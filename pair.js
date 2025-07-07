@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const {
-  makeWASocket,
+  default: makeWASocket,
   useMultiFileAuthState,
   fetchLatestBaileysVersion
 } = require('@whiskeysockets/baileys');
@@ -22,20 +22,23 @@ router.post('/', async (req, res) => {
       auth: state,
       version,
       printQRInTerminal: false,
-      browser: ['Nonchalant', 'Chrome', '1.0']
+      browser: ['NONCHALANT', 'Chrome', '10.0']
     });
 
     let sent = false;
+
     sock.ev.on('connection.update', async (update) => {
-      const { connection, pairingCode } = update;
+      const { pairingCode, connection } = update;
+
       if (pairingCode && !sent) {
         sent = true;
+        console.log('Pairing Code:', pairingCode);
         return res.json({ pairingCode });
       }
 
       if (connection === 'open') {
-        console.log('✅ Connected');
         await saveCreds();
+        console.log('✅ Paired successfully with', sock.user.id);
       }
 
       if (connection === 'close') {
@@ -45,10 +48,8 @@ router.post('/', async (req, res) => {
 
     sock.ev.on('creds.update', saveCreds);
   } catch (err) {
-    console.error('Error:', err.message);
-    if (!res.headersSent) {
-      return res.status(500).json({ error: '❗ Service Unavailable' });
-    }
+    console.error(err);
+    if (!res.headersSent) res.status(500).json({ error: 'Service Unavailable' });
   }
 });
 
