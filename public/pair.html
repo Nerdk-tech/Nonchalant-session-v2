@@ -1,51 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Pair Code Generator</title>
+  <title>Nonchalant Session</title>
   <style>
     body {
-      background-color: #000;
-      color: #00ffcc;
+      background-color: black;
+      color: lime;
       font-family: monospace;
       text-align: center;
-      padding-top: 100px;
+      padding-top: 50px;
     }
     input, button {
       font-size: 18px;
       padding: 10px;
       margin: 10px;
-      background-color: #111;
-      color: #00ffcc;
-      border: 1px solid #00ffcc;
-      border-radius: 5px;
-    }
-    #code {
-      margin-top: 20px;
-      font-size: 24px;
     }
   </style>
 </head>
 <body>
-  <h1>🔐 Generate WhatsApp Pairing Code</h1>
-  <input type="text" id="phone" placeholder="Enter phone number e.g. 23490..."><br>
-  <button onclick="getCode()">Generate Code</button>
-  <div id="code"></div>
-
+  <h1>🔐 NONCHALANT SESSION 🔐</h1>
+  <p>Enter your WhatsApp number (e.g. 23480xxxxxxx)</p>
+  <input id="phone" placeholder="Enter number with country code"><br>
+  <button onclick="generate()">Get Pair Code</button>
+  <h2 id="code"></h2>
   <script>
-    async function getCode() {
+    async function generate() {
       const phone = document.getElementById('phone').value;
-      document.getElementById('code').innerText = 'Generating...';
+      document.getElementById('code').innerText = "Generating...";
       const res = await fetch('/code', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ phone })
       });
       const data = await res.json();
-      if (data.pairingCode) {
-        document.getElementById('code').innerText = 'Your Code: ' + data.pairingCode;
-      } else {
-        document.getElementById('code').innerText = '❌ Failed to get code';
-      }
+      document.getElementById('code').innerText = data.pairingCode || 'Failed';
     }
   </script>
 </body>
