@@ -1,21 +1,20 @@
 const express = require('express');
-const app = express();
+const bodyParser = require('body-parser');
 const path = require('path');
-const bodyParser = require("body-parser");
-require('events').EventEmitter.defaultMaxListeners = 500;
-
-const __path = process.cwd();
-const code = require('./pair');
+const app = express();
+const PORT = process.env.PORT || 8000;
+const pair = require('./pair');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/code', code);
-app.use('/pair', (req, res) => res.sendFile(path.join(__path, 'public', 'pair.html')));
-app.use('/', (req, res) => res.redirect('/pair'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`✅ Session server running at http://localhost:` + PORT);
+app.post('/code', pair);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pair.html'));
 });
 
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`🚀 Session server running at http://localhost:${PORT}`);
+});
