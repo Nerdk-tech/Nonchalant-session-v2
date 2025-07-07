@@ -1,11 +1,8 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion
-} = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, delay } = require('@whiskeysockets/baileys');
+const pino = require("pino");
 
 const router = express.Router();
 
@@ -22,7 +19,8 @@ router.post('/', async (req, res) => {
       auth: state,
       version,
       printQRInTerminal: false,
-      browser: ['NONCHALANT', 'Chrome', '10.0']
+      logger: pino({ level: "silent" }),
+      browser: ['Nonchalant', 'Chrome', '18.0']
     });
 
     let sent = false;
@@ -37,8 +35,28 @@ router.post('/', async (req, res) => {
       }
 
       if (connection === 'open') {
+        await delay(3000);
         await saveCreds();
-        console.log('✅ Paired successfully with', sock.user.id);
+        const sessionData = fs.readFileSync(path.join(sessionPath, 'creds.json'));
+        const sessionId = 'nonchalant~' + Buffer.from(sessionData).toString('base64').slice(0, 32);
+
+        const msg = `*🌟 THANK YOU FOR CHOOSING NONCHALANT-MD 🌟*
+
+🔐 *YOUR SESSION ID:*
+\`\`\`
+${sessionId}
+\`\`\`
+
+✅ *DEPLOY YOUR BOT ON RENDER*  
+📦 *Visit:* https://github.com/Nerdk-tech/NONCHALANT-MD
+
+Stay safe, stay smart.  
+_~ Powered by DAMI_
+        `;
+        await sock.sendMessage(sock.user.id, { text: msg });
+        console.log('✅ Session ID sent to WhatsApp');
+        await delay(5000);
+        process.exit();
       }
 
       if (connection === 'close') {
